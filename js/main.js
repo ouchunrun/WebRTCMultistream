@@ -47,6 +47,17 @@ function isMultiStream(){
   return result
 }
 
+function getSelectVaule(id){
+  let result = false
+  let multiStreamOptions = document.getElementById(id).options
+  if(multiStreamOptions && multiStreamOptions.length > 0){
+    let selectedIndex = multiStreamOptions[multiStreamOptions.selectedIndex]
+    result = selectedIndex.value
+  }
+
+  return result
+}
+
 /**
  * 通过 canvas.captureStream()方式获取流
  */
@@ -116,7 +127,13 @@ async function call() {
   console.log('Starting call');
   startTime = window.performance.now();
 
-  const configuration = {};
+  var sdpPlan = getSelectVaule('sdp-plan')
+  console.warn("sdpPlan: ",  sdpPlan)
+
+  const configuration = {
+    // sdpSemantics:  "unified-plan",
+    sdpSemantics:  sdpPlan
+  };
   console.log('RTCPeerConnection configuration:', configuration);
   pc1 = new RTCPeerConnection(configuration);
   console.log('Created local peer connection object pc1');
@@ -152,10 +169,11 @@ async function call() {
         || ( adapter.browserDetails.browser === 'firefox'&&  adapter.browserDetails.version >= 59)
         || ( adapter.browserDetails.browser === 'safari' &&  adapter.browserDetails.UIVersion >= "12.1.1")))
     {
-      console.log('使用addTransceiver添加两个Transceiver')
+      console.log('使用addTransceiver添加Transceiver')
+      // 添加audio transceiver ,确保audio媒体行保持在前
+      pc1.addTransceiver('audio')
       pc1.addTransceiver('video')
       pc1.addTransceiver('video')
-
     }else {
       alert("当前浏览器不支持addTransceiver接口，请在其他浏览器版本尝试！")
       return
@@ -316,3 +334,5 @@ remoteVideo.addEventListener('resize', () => {
     startTime = null;
   }
 });
+
+
